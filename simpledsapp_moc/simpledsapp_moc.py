@@ -11,24 +11,28 @@
 
 import  sys
 import  os
-
+import  shutil
+import  time
+import  sys
+import  time
+import  json
 # import the Chris app superclass
 from    chrisapp.base   import ChrisApp
 
 Gstr_title = """
 
-Generate a title from 
-http://patorjk.com/software/taag/#p=display&f=Doom&t=pluginTitle
+     _                 _          _                                             
+    (_)               | |        | |                                            
+ ___ _ _ __ ___  _ __ | | ___  __| |___  __ _ _ __  _ __   _ __ ___   ___   ___ 
+/ __| | '_ ` _ \| '_ \| |/ _ \/ _` / __|/ _` | '_ \| '_ \ | '_ ` _ \ / _ \ / __|
+\__ \ | | | | | | |_) | |  __/ (_| \__ \ (_| | |_) | |_) || | | | | | (_) | (__ 
+|___/_|_| |_| |_| .__/|_|\___|\__,_|___/\__,_| .__/| .__/ |_| |_| |_|\___/ \___|
+                | |                          | |   | |______                    
+                |_|                          |_|   |_|______|                   
 
 """
 
 Gstr_synopsis = """
-
-(Edit this in-line help for app specifics. At a minimum, the 
-flags below are supported -- in the case of DS apps, both
-positional arguments <inputDir> and <outputDir>; for FS apps
-only <outputDir> -- and similarly for <in> <out> directories
-where necessary.)
 
     NAME
 
@@ -36,7 +40,10 @@ where necessary.)
 
     SYNOPSIS
 
-        python simpledsapp_moc.py                                         \\
+        python simpledsapp_moc.py                                       \\
+            [--prefix <filePrefixString>]                               \\
+            [--sleepLength <sleepLength>]                               \\
+            [--ignoreInputDir]                                          \\
             [-v <level>] [--verbosity <level>]                          \\
             [--version]                                                 \\
             [--man]                                                     \\
@@ -49,14 +56,28 @@ where necessary.)
         * Bare bones execution
 
             mkdir in out && chmod 777 out
-            python simpledsapp_moc.py   \\
-                                in    out
+            python simpledsapp_moc.py in out
 
     DESCRIPTION
 
-        `simpledsapp_moc.py` ...
+        `simpledsapp_moc.py` basically does an explicit copy of each file in 
+        an input directory to the output directory, prefixing an optional
+        string to each filename.
 
     ARGS
+
+        [--prefix <prefixString>]
+        If specified, a prefix string to append to each file copied.
+
+        [--sleepLength <sleepLength>]
+        If specified, sleep for <sleepLength> seconds before starting
+        script processing. This is to simulate a possibly long running 
+        process.
+
+        [--ignoreInputDir] 
+        If specified, ignore the input directory. Simply write a single json 
+        file to the output dir that is a timestamp. Useful if the input 
+        directory contains large nested file trees.
 
         [-v <level>] [--verbosity <level>]
         Verbosity level for app. Not used currently.
@@ -85,7 +106,7 @@ class Simpledsapp_moc(ChrisApp):
     TYPE                    = 'ds'
     DESCRIPTION             = 'A simple DS type ChRIS application specifically created for the Massachusetts Open Cloud remote computing environment.'
     DOCUMENTATION           = 'http://wiki'
-    VERSION                 = '0.0.99'
+    VERSION                 = '1.0.0'
     ICON                    = '' # url of an icon image
     LICENSE                 = 'Opensource (MIT)'
     MAX_NUMBER_OF_WORKERS   = 1  # Override with integer value
@@ -130,6 +151,25 @@ class Simpledsapp_moc(ChrisApp):
         """
         Define the CLI arguments accepted by this plugin app.
         """
+        self.add_argument('--prefix', 
+                           dest         = 'prefix', 
+                           type         = str, 
+                           optional     = True,
+                           help         = 'prefix for file names',
+                           default      = '')
+        self.add_argument('--ignoreInputDir',
+                           dest         = 'b_ignoreInputDir',
+                           type         = bool,
+                           optional     = True,
+                           help         = 'if set, ignore the input dir completely',
+                           action       = 'store_true',
+                           default      = False)
+        self.add_argument('--sleepLength',
+                           dest         = 'sleepLength',
+                           type         = str,
+                           optional     = True,
+                           help         = 'time to sleep before performing plugin action',
+                           default      = '0')
         self.add_argument("-v", "--verbosity",
                             help        = "verbosity level for app",
                             type        = str,
@@ -176,6 +216,34 @@ class Simpledsapp_moc(ChrisApp):
 
         print(Gstr_title)
         print('Version: %s' % Simpledsapp_moc.VERSION)
+        print('Sleeping for %s' % options.sleepLength)
+        time.sleep(int(options.sleepLength))
+        if options.b_ignoreInputDir:
+            # simply create a timestamp in the output dir
+            d_timeStamp = {
+                'year':     time.strftime('%Y'),
+                'month':    time.strftime('%m'),
+                'day':      time.strftime('%d'),
+                'hour':     time.strftime('%H'),
+                'minute':   time.strftime('%M'),
+                'second':   time.strftime('%S'),
+            }
+            print('Saving timestamp object')
+            print(json.dumps(d_timeStamp, indent = 4))
+            with open('%s/timestamp.json' % options.outputdir, 'w') as f:
+                json.dump(d_timeStamp, f, indent = 4)
+        else:
+            for (dirpath, dirnames, filenames) in os.walk(options.inputdir):
+                relative_path  = dirpath.replace(options.inputdir, "").strip("/")
+                output_path =  os.path.join(options.outputdir, relative_path)
+                for dirname in dirnames:
+                    print('Creating directory... %s' % os.path.join(output_path, dirname))
+                    os.makedirs(os.path.join(output_path, dirname))
+                for name in filenames:
+                    new_name    = options.prefix + name
+                    str_outpath = os.path.join(output_path, new_name)
+                    print('Creating new file... %s' % str_outpath)
+                    shutil.copy(os.path.join(dirpath, name), str_outpath)
 
 # ENTRYPOINT
 if __name__ == "__main__":

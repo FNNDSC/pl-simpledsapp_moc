@@ -24,7 +24,10 @@ Synopsis
 
 .. code::
 
-    python simpledsapp_moc.py                                           \
+    python simpledsapp_moc.py                                       \
+        [--prefix <filePrefixString>]                               \
+        [--sleepLength <sleepLength>]                               \
+        [--ignoreInputDir]                                          \
         [-v <level>] [--verbosity <level>]                          \
         [--version]                                                 \
         [--man]                                                     \
@@ -35,12 +38,21 @@ Synopsis
 Description
 -----------
 
-``simpledsapp_moc.py`` is a ChRIS-based application that...
+``simpledsapp_moc.py`` is a ChRIS-based application that basically does an explicit copy of each file in  an input directory to the output directory, prefixing an optional string to each filename.
 
 Agruments
 ---------
 
 .. code::
+
+    [--prefix <prefixString>]
+    If specified, a prefix string to append to each file copied.
+
+    [--sleepLength <sleepLength>]
+    If specified, sleep for <sleepLength> seconds before starting script processing. This is to simulate a possibly long running  process.
+
+    [--ignoreInputDir] 
+    If specified, ignore the input directory. Simply write a single json  file to the output dir that is a timestamp. Useful if the input  directory contains large nested file trees.
 
     [-v <level>] [--verbosity <level>]
     Verbosity level for app. Not used currently.
@@ -92,7 +104,7 @@ Now, prefix all calls with
 .. code:: bash
 
     docker run --rm -v $(pwd)/out:/outgoing                             \
-            fnndsc/pl-simpledsapp_moc simpledsapp_moc.py                        \
+            fnndsc/pl-simpledsapp_moc simpledsapp_moc.py                \
 
 Thus, getting inline help is:
 
@@ -100,7 +112,7 @@ Thus, getting inline help is:
 
     mkdir in out && chmod 777 out
     docker run --rm -v $(pwd)/in:/incoming -v $(pwd)/out:/outgoing      \
-            fnndsc/pl-simpledsapp_moc simpledsapp_moc.py                        \
+            fnndsc/pl-simpledsapp_moc simpledsapp_moc.py                \
             --man                                                       \
             /incoming /outgoing
 

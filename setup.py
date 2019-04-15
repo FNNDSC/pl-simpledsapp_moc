@@ -15,7 +15,7 @@ def readme():
 
 setup(
       name             =   'simpledsapp_moc',
-      version          =   '0.0.99',
+      version          =   '1.0.0',
       description      =   'A simple DS type ChRIS application specifically created for the Massachusetts Open Cloud remote computing environment.', 
       long_description =   readme(),
       author           =   'FNNDSC',
