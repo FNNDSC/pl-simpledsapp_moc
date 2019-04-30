@@ -81,13 +81,13 @@ Gstr_synopsis = """
         Verbosity level for app. Not used currently.
 
         [--version]
-        If specified, print version number. 
+        If specified, print version number and exit. 
         
         [--man]
-        If specified, print (this) man page.
+        If specified, print (this) man page and exit.
 
         [--meta]
-        If specified, print plugin meta data.
+        If specified, print plugin meta data and exit.
 
 """
 
@@ -146,7 +146,6 @@ class Simpledsapp_moc(ChrisApp):
                            type         = bool,
                            optional     = True,
                            help         = 'if set, ignore the input dir completely',
-                           action       = 'store_true',
                            default      = False)
         self.add_argument('--sleepLength',
                            dest         = 'sleepLength',
