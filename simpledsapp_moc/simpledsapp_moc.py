@@ -9,15 +9,13 @@
 #                        dev@babyMRI.org
 #
 
-import  sys
-import  os
-import  shutil
-import  time
-import  sys
-import  time
-import  json
+import os
+import shutil
+import time
+import json
 # import the Chris app superclass
-from    chrisapp.base   import ChrisApp
+from chrisapp.base import ChrisApp
+
 
 Gstr_title = """
 
@@ -93,6 +91,7 @@ Gstr_synopsis = """
 
 """
 
+
 class Simpledsapp_moc(ChrisApp):
     """
     A simple DS type ChRIS application specifically created for the Massachusetts Open Cloud remote computing environment..
@@ -106,7 +105,7 @@ class Simpledsapp_moc(ChrisApp):
     TYPE                    = 'ds'
     DESCRIPTION             = 'A simple DS type ChRIS application specifically created for the Massachusetts Open Cloud remote computing environment.'
     DOCUMENTATION           = 'http://wiki'
-    VERSION                 = '1.0.0'
+    VERSION                 = '1.0.1'
     ICON                    = '' # url of an icon image
     LICENSE                 = 'Opensource (MIT)'
     MAX_NUMBER_OF_WORKERS   = 1  # Override with integer value
@@ -130,26 +129,11 @@ class Simpledsapp_moc(ChrisApp):
     # flag. Note also that all file paths are relative to the system specified
     # output directory.
     OUTPUT_META_DICT = {}
- 
-    def manPage_show(self):
-        """
-        Print some quick help.
-        """
-        print(Gstr_synopsis)
-
-    def metaData_show(self):
-        """
-        Print the plugin meta data
-        """
-        l_metaData  = dir(self)
-        l_classVar  = [x for x in l_metaData if x.isupper() ]
-        for str_var in l_classVar:
-            str_val = getattr(self, str_var)
-            print("%20s: %s" % (str_var, str_val))
 
     def define_parameters(self):
         """
         Define the CLI arguments accepted by this plugin app.
+        Use self.add_argument to specify a new app argument.
         """
         self.add_argument('--prefix', 
                            dest         = 'prefix', 
@@ -170,50 +154,11 @@ class Simpledsapp_moc(ChrisApp):
                            optional     = True,
                            help         = 'time to sleep before performing plugin action',
                            default      = '0')
-        self.add_argument("-v", "--verbosity",
-                            help        = "verbosity level for app",
-                            type        = str,
-                            dest        = 'verbosity',
-                            optional    = True,
-                            default     = "0")
-        self.add_argument('--man',
-                            help        = 'if specified, print man page',
-                            type        = bool,
-                            dest        = 'b_man',
-                            action      = 'store_true',
-                            optional    = True,
-                            default     = False)
-        self.add_argument('--meta',
-                            help        = 'if specified, print plugin meta data',
-                            type        = bool,
-                            dest        = 'b_meta',
-                            action      = 'store_true',
-                            optional    = True,
-                            default     = False)
-        self.add_argument('--version',
-                            help        = 'if specified, print version number',
-                            type        = bool,
-                            dest        = 'b_version',
-                            action      = 'store_true',
-                            optional    = True,
-                            default     = False)
 
     def run(self, options):
         """
         Define the code to be run by this plugin app.
         """
-        if options.b_man:
-            self.manPage_show()
-            sys.exit(0)
-
-        if options.b_meta:
-            self.metaData_show()
-            sys.exit(0)
-
-        if options.b_version:
-            print('Plugin Version: %s' % Simpledsapp_moc.VERSION)
-            sys.exit(0)
-
         print(Gstr_title)
         print('Version: %s' % Simpledsapp_moc.VERSION)
         print('Sleeping for %s' % options.sleepLength)
@@ -244,6 +189,13 @@ class Simpledsapp_moc(ChrisApp):
                     str_outpath = os.path.join(output_path, new_name)
                     print('Creating new file... %s' % str_outpath)
                     shutil.copy(os.path.join(dirpath, name), str_outpath)
+
+    def show_man_page(self):
+        """
+        Print the app's man page.
+        """
+        print(Gstr_synopsis)
+
 
 # ENTRYPOINT
 if __name__ == "__main__":
