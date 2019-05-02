@@ -26,7 +26,7 @@
 FROM fnndsc/ubuntu-python3:latest
 MAINTAINER fnndsc "dev@babymri.org"
 
-ENV APPROOT="/usr/src/simpledsapp_moc"  VERSION="1.0.1"
+ENV APPROOT="/usr/src/simpledsapp_moc" 
 COPY ["simpledsapp_moc", "${APPROOT}"]
 COPY ["requirements.txt", "${APPROOT}"]
 
